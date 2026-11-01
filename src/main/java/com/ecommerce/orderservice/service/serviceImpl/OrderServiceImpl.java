@@ -1,7 +1,9 @@
 package com.ecommerce.orderservice.service.serviceImpl;
 
+import com.ecommerce.orderservice.client.InventoryFeignClient;
 import com.ecommerce.orderservice.dto.CreateOrderRequest;
 import com.ecommerce.orderservice.dto.OrderResponse;
+import com.ecommerce.orderservice.dto.StockOperationRequest;
 import com.ecommerce.orderservice.entities.Order;
 import com.ecommerce.orderservice.entities.OrderStatus;
 import com.ecommerce.orderservice.exception.InvalidOrderStateException;
@@ -17,18 +19,21 @@ import java.util.List;
 @org.springframework.stereotype.Service
 public class OrderServiceImpl implements OrderService {
     private final OrderServiceRepository repository;
-
-    public OrderServiceImpl(OrderServiceRepository repository) {
+    private final InventoryFeignClient client;
+    public OrderServiceImpl(OrderServiceRepository repository, InventoryFeignClient client) {
         this.repository = repository;
-
+        this.client = client;
     }
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
+        StockOperationRequest quantity=new StockOperationRequest(request.getQuantity());
+        client.reserveStock(request.getProductId(),quantity);
         Order order=new Order();
         order.setProductId(request.getProductId());
         order.setQuantity(request.getQuantity());
         order.setUnitPrice(request.getUnitPrice());
         order.setTotalAmount(request.getUnitPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
+        order.setOrderStatus(OrderStatus.CREATED);
         repository.save(order);
         return OrderMapperClass.toDto(order);
     }
@@ -58,9 +63,13 @@ public class OrderServiceImpl implements OrderService {
         return OrderMapperClass.toDto(order1);
     }
 
+
     @Override
     public OrderResponse updateStatus(Long id, OrderStatus status) {
-        return null;
+        Order order=repository.findById(id).orElseThrow(()->
+                new OrderNotFoundException("Order not Found :"+id));
+        order.setOrderStatus(status);
+        return OrderMapperClass.toDto(repository.save(order));
     }
 
     @Override
