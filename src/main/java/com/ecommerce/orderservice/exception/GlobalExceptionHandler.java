@@ -1,5 +1,7 @@
 package com.ecommerce.orderservice.exception;
 
+import com.ecommerce.orderservice.client.exception.InventoryFeignErrorDecoder;
+import com.ecommerce.orderservice.client.exception.InventoryServiceException;
 import com.ecommerce.orderservice.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> exception(Exception ex,HttpServletRequest request){
         return buildResponse( HttpStatus.INTERNAL_SERVER_ERROR,ex.getMessage(),request,Map.of());
+    }
+
+    @ExceptionHandler(InventoryServiceException.class)
+    public ResponseEntity<ErrorResponse> invalidOrderStateException(InventoryServiceException exception,
+                                                                    HttpServletRequest request){
+        return buildResponse( exception.getStatus(),exception.getMessage(),request,Map.of());
     }
 
 

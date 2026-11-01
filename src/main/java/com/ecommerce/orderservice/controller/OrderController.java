@@ -8,13 +8,13 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/orders")
 public class OrderController {
    private final OrderServiceImpl orderService;
+
     public OrderController(OrderServiceImpl orderService) {
         this.orderService = orderService;
     }
@@ -30,7 +30,7 @@ public class OrderController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<OrderResponse>> getAllOrders(@PathVariable Long id){
+    public ResponseEntity<List<OrderResponse>> getAllOrders(){
         return  new ResponseEntity<>(orderService.getAllOrders(),HttpStatus.OK);
     }
 
