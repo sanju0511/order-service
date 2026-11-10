@@ -8,10 +8,13 @@ import com.ecommerce.orderservice.entities.OrderStatus;
 import java.util.List;
 
 public interface OrderService {
-    OrderResponse createOrder(CreateOrderRequest request);
+    OrderResponse createOrder(CreateOrderRequest request,String idempotencyKey);
     OrderResponse getOrderById(Long id);
     List<OrderResponse> getAllOrders();
     OrderResponse updateOrder(Long id,CreateOrderRequest request);
+
+    OrderResponse cancelOrder(Long id);
+
     OrderResponse updateStatus(Long id, OrderStatus status);
     void deleteOrder(Long id);
 }
